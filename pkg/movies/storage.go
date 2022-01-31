@@ -1,5 +1,5 @@
 package movies
 
 type MovieStorage interface {
-	Lookup()
+	Lookup(title string) ([]MovieSearchRes, error)
 }
