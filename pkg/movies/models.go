@@ -5,13 +5,16 @@ import "gorm.io/gorm"
 type Movie struct {
 	gorm.Model
 	Title    string
+	Year     string
 	Genre    string
 	ImdbID   string
+	TmdbID   int
 	Director string
 	Actors   string //as CSV
 	Runtime  string
 	Released string
 	Poster   string
+	OverView string
 }
 
 // responses from movies APIs
@@ -19,6 +22,7 @@ type Movie struct {
 // OmdbResponse is the response from http://www.omdbapi.com
 // API call for search => http://www.omdbapi.com/?s={title}&apikey={key}
 // API call for one movie => http://www.omdbapi.com/?i={IMDB_ID}&apikey={key}
+// API call for one movie => http://www.omdbapi.com/?t={title}&apikey={key} will return most valued in IMDB
 type OmdbResponse struct {
 	Search []OmdbResult `json:"Search"`
 }
@@ -40,11 +44,20 @@ type TmdbResponse struct {
 
 type TmdbResult struct {
 	ID               int    `json:"id"`
-	BackdropPath     string `json:"backdrop_path"`
+	Title            string `json:"title"`
+	Poster           string `json:"backdrop_path"`
 	OriginalLanguage string `json:"original_language"`
 	OriginalTitle    string `json:"original_title"`
 	Overview         string `json:"overview"`
 	PosterPath       string `json:"poster_path"`
 	ReleaseDate      string `json:"release_date"`
-	Title            string `json:"title"`
+
+}
+
+type MovieSearchRes struct {
+	Title  string `json:"Title"`
+	Poster string `json:"Poster"`
+	ImdbID string `json:"imdbID"`
+	Year   string `json:"Year"`
+	Type   string `json:"Type"`
 }
