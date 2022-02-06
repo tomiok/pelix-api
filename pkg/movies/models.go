@@ -56,11 +56,11 @@ type TmdbResult struct {
 type MovieSearchRes struct {
 	Title  string `json:"title"`
 	Poster string `json:"poster"`
-	ImdbID string `json:"imdbID"`
+	ImdbID string `json:"imdbID,omitempty"`
 	Year   string `json:"year"`
-	Type   string `json:"type"`
+	Type   string `json:"type,omitempty"`
 	//to movie db api ID
-	MovieDbId uint `json:"the_movie_db_id"`
+	MovieDbId uint `json:"the_movie_db_id,omitempty"`
 }
 
 func (o *OmdbResponse) ToApi() []MovieSearchRes {
@@ -99,8 +99,8 @@ func (u *UpcomingMovies) ToApi() []MovieSearchRes {
 
 	for _, s := range u.Results {
 		res = append(res, MovieSearchRes{
-			Title:  s.Title,
-			Poster: s.PosterPath,
+			Title:     s.Title,
+			Poster:    s.PosterPath,
 			Year:      s.ReleaseDate,
 			MovieDbId: s.ID,
 		})
