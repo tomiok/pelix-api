@@ -39,6 +39,7 @@ func CreateServer() *Server {
 
 func setUpRoutes(app *fiber.App) {
 	setupUserRoutes(app)
+	setUpMovieRoutes(app)
 }
 
 func (srv *Server) Run(port string) error {

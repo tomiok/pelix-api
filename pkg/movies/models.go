@@ -51,13 +51,59 @@ type TmdbResult struct {
 	Overview         string `json:"overview"`
 	PosterPath       string `json:"poster_path"`
 	ReleaseDate      string `json:"release_date"`
-
 }
 
 type MovieSearchRes struct {
-	Title  string `json:"Title"`
-	Poster string `json:"Poster"`
+	Title  string `json:"title"`
+	Poster string `json:"poster"`
 	ImdbID string `json:"imdbID"`
-	Year   string `json:"Year"`
-	Type   string `json:"Type"`
+	Year   string `json:"year"`
+	Type   string `json:"type"`
+	//to movie db api ID
+	MovieDbId uint `json:"the_movie_db_id"`
+}
+
+func (o *OmdbResponse) ToApi() []MovieSearchRes {
+	var res []MovieSearchRes
+	for _, s := range o.Search {
+		res = append(res, MovieSearchRes{
+			Title:  s.Title,
+			Poster: s.Poster,
+			ImdbID: s.ImdbID,
+			Year:   s.Year,
+			Type:   s.Type,
+		})
+	}
+	return res
+}
+
+//UpcomingMovies response from API
+type UpcomingMovies struct {
+	Results []UpcomingResult `json:"results"`
+}
+
+type UpcomingResult struct {
+	ID               uint   `json:"id"`
+	Adult            bool   `json:"adult"`
+	BackdropPath     string `json:"backdrop_path"`
+	OriginalLanguage string `json:"original_language"`
+	OriginalTitle    string `json:"original_title"`
+	Overview         string `json:"overview"`
+	PosterPath       string `json:"poster_path"`
+	ReleaseDate      string `json:"release_date"`
+	Title            string `json:"title"`
+}
+
+func (u *UpcomingMovies) ToApi() []MovieSearchRes {
+	var res []MovieSearchRes
+
+	for _, s := range u.Results {
+		res = append(res, MovieSearchRes{
+			Title:  s.Title,
+			Poster: s.PosterPath,
+			Year:      s.ReleaseDate,
+			MovieDbId: s.ID,
+		})
+	}
+	return res
 }
