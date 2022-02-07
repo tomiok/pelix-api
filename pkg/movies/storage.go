@@ -28,8 +28,14 @@ func newMovieStorage(db *gorm.DB) *movieStorage {
 }
 
 func (m *movieStorage) Lookup(title string) ([]MovieSearchRes, error) {
-	fn := search()
-	return fn(title)
+	result, err := search(title)
+
+	if err != nil {
+		return nil, err
+	}
+
+	go m.SaveLocal(result)
+	return result, nil
 }
 
 func (m *movieStorage) Upcoming() ([]MovieSearchRes, error) {
@@ -65,29 +71,28 @@ func save(m MovieSearchRes, db *gorm.DB, wg *sync.WaitGroup) {
 	wg.Done()
 }
 
-func search() func(t string) ([]MovieSearchRes, error) {
-	return func(t string) ([]MovieSearchRes, error) {
-		uriFmt := "https://www.omdbapi.com/?s=%s&apikey=4ecb0111"
-		res, err := http.Get(fmt.Sprintf(uriFmt, t))
+const uriFmt = "https://www.omdbapi.com/?s=%s&apikey=4ecb0111"
 
-		if err != nil {
-			return nil, err
-		}
+func search(t string) ([]MovieSearchRes, error) {
+	res, err := http.Get(fmt.Sprintf(uriFmt, t))
 
-		body := res.Body
-		defer func() {
-			_ = body.Close()
-		}()
-
-		var omdbRes OmdbResponse
-		err = json.NewDecoder(body).Decode(&omdbRes)
-
-		if err != nil {
-			return nil, err
-		}
-
-		return omdbRes.ToApi(), nil
+	if err != nil {
+		return nil, err
 	}
+
+	body := res.Body
+	defer func() {
+		_ = body.Close()
+	}()
+
+	var omdbRes OmdbResponse
+	err = json.NewDecoder(body).Decode(&omdbRes)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return omdbRes.ToApi(), nil
 }
 
 func upcoming() ([]MovieSearchRes, error) {
