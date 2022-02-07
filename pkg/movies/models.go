@@ -7,8 +7,8 @@ type Movie struct {
 	Title    string
 	Year     string
 	Genre    string
-	ImdbID   string
-	TmdbID   int
+	ImdbID   *string `gorm:"column:imdb_id;uniqueIndex;default=null"`
+	TmdbID   *int    `gorm:"column:tmdb_id;uniqueIndex;default=null"`
 	Director string
 	Actors   string //as CSV
 	Runtime  string
@@ -60,7 +60,17 @@ type MovieSearchRes struct {
 	Year   string `json:"year"`
 	Type   string `json:"type,omitempty"`
 	//to movie db api ID
-	MovieDbId uint `json:"the_movie_db_id,omitempty"`
+	MovieDbId int `json:"the_movie_db_id,omitempty"`
+}
+
+func (msr *MovieSearchRes) ToMovie() *Movie {
+	return &Movie{
+		Title:  msr.Title,
+		Year:   msr.Year,
+		ImdbID: SafeString(msr.ImdbID),
+		TmdbID: SafeInt(msr.MovieDbId),
+		Poster: msr.Poster,
+	}
 }
 
 func (o *OmdbResponse) ToApi() []MovieSearchRes {
@@ -83,7 +93,7 @@ type UpcomingMovies struct {
 }
 
 type UpcomingResult struct {
-	ID               uint   `json:"id"`
+	ID               int    `json:"id"`
 	Adult            bool   `json:"adult"`
 	BackdropPath     string `json:"backdrop_path"`
 	OriginalLanguage string `json:"original_language"`
@@ -106,4 +116,9 @@ func (u *UpcomingMovies) ToApi() []MovieSearchRes {
 		})
 	}
 	return res
+}
+
+// MigrateModels update db with models
+func MigrateModels(db *gorm.DB) error {
+	return db.AutoMigrate(&Movie{})
 }

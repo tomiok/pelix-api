@@ -3,14 +3,18 @@ package movies
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/rs/zerolog/log"
 	"gorm.io/gorm"
 	"net/http"
 	"os"
+	"sync"
 )
 
 type MovieStorage interface {
 	Lookup(title string) ([]MovieSearchRes, error)
 	Upcoming() ([]MovieSearchRes, error)
+	//SaveLocal save in local DB
+	SaveLocal(movies []MovieSearchRes)
 }
 
 type movieStorage struct {
@@ -29,7 +33,36 @@ func (m *movieStorage) Lookup(title string) ([]MovieSearchRes, error) {
 }
 
 func (m *movieStorage) Upcoming() ([]MovieSearchRes, error) {
-	return upcoming()
+	result, err := upcoming()
+
+	if err != nil {
+		return nil, err
+	}
+
+	go m.SaveLocal(result)
+
+	return result, err
+}
+
+func (m *movieStorage) SaveLocal(movies []MovieSearchRes) {
+	var wg sync.WaitGroup
+	for _, movie := range movies {
+		wg.Add(1)
+		go save(movie, m.db, &wg)
+	}
+	wg.Wait()
+}
+
+func save(m MovieSearchRes, db *gorm.DB, wg *sync.WaitGroup) {
+	movie := m.ToMovie()
+
+	err := db.Create(movie).Error
+
+	if err != nil {
+		log.Error().Err(err)
+	}
+
+	wg.Done()
 }
 
 func search() func(t string) ([]MovieSearchRes, error) {
