@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/rs/zerolog/log"
+	"github.com/tomiok/pelix-api/pkg/users"
 	"gorm.io/gorm"
 	"net/http"
 	"os"
@@ -17,12 +18,63 @@ type MovieStorage interface {
 	SaveLocal(movies []MovieSearchRes)
 }
 
+type ListStorage interface {
+	Add(item ListItem) error
+	Update(itemId uint) error
+}
+
+func (l *listStorage) Add(item ListItem) error {
+	//check if the list is created
+	var list WatchList
+	rows := l.db.Where("user_id=?", item.UserId).First(&list).RowsAffected
+
+	if rows == 0 {
+		l.db.Create(&list)
+	}
+
+	var user users.User
+	err := l.db.Where("id=?", item.UserId).First(&user).Error
+
+	if err != nil {
+		return err
+	}
+
+	var movie Movie
+	err = l.db.Where("id=?", item.MovieId).First(&movie).Error
+
+	if err != nil {
+		return err
+	}
+
+	listItem := WatchList{
+		User:   user,
+		Movies: append(list.Movies, movie),
+		Seen:   false,
+	}
+
+	return l.db.Save(&listItem).Error
+}
+
+func (l *listStorage) Update(itemId uint) error {
+	panic("implement me")
+}
+
 type movieStorage struct {
+	db *gorm.DB
+}
+
+type listStorage struct {
 	db *gorm.DB
 }
 
 func newMovieStorage(db *gorm.DB) *movieStorage {
 	return &movieStorage{
+		db: db,
+	}
+}
+
+func newListStorage(db *gorm.DB) *listStorage {
+	return &listStorage{
 		db: db,
 	}
 }

@@ -1,6 +1,9 @@
 package movies
 
-import "gorm.io/gorm"
+import (
+	"github.com/tomiok/pelix-api/pkg/users"
+	"gorm.io/gorm"
+)
 
 type Movie struct {
 	gorm.Model
@@ -15,6 +18,19 @@ type Movie struct {
 	Released string
 	Poster   string
 	OverView string
+}
+
+// WatchList is the list with IN OWN database movies
+type WatchList struct {
+	gorm.Model
+	User   users.User
+	Movies []Movie
+	Seen   bool
+}
+
+type ListItem struct {
+	UserId  uint `json:"user_id,omitempty"` // could be grabbed from JWT
+	MovieId uint `json:"movie_id"`
 }
 
 // responses from movies APIs

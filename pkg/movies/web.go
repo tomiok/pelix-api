@@ -3,6 +3,7 @@ package movies
 import (
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
+	"net/http"
 )
 
 type Web struct {
@@ -10,8 +11,9 @@ type Web struct {
 }
 
 func NewWeb(db *gorm.DB) *Web {
-	storage := newMovieStorage(db)
-	service := NewService(storage)
+	movieStorage := newMovieStorage(db)
+	listStorage := newListStorage(db)
+	service := NewService(movieStorage, listStorage)
 	return &Web{
 		service,
 	}
@@ -36,4 +38,25 @@ func (w *Web) UpcomingMoviesHandler(ctx *fiber.Ctx) error {
 	}
 
 	return ctx.JSON(res)
+}
+
+func (w *Web) AddMovieToListHandler(ctx *fiber.Ctx) error {
+	var listItem ListItem
+	err := ctx.BodyParser(&listItem)
+
+	if err != nil {
+		return err
+	}
+
+	err = w.Add(listItem)
+
+	if err != nil {
+		return err
+	}
+	ctx.Status(http.StatusCreated)
+	return ctx.JSON(&AddToListResponse{Message: "added ok"})
+}
+
+type AddToListResponse struct {
+	Message string `json:"msg"`
 }

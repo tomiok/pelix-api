@@ -2,10 +2,15 @@ package movies
 
 type Service struct {
 	MovieStorage
+	ListStorage
 }
 
-func NewService(stg MovieStorage) *Service {
+func NewService(
+	movieStorage MovieStorage,
+	listStorage ListStorage,
+) *Service {
 	return &Service{
-		MovieStorage: stg,
+		MovieStorage: movieStorage,
+		ListStorage:  listStorage,
 	}
 }
