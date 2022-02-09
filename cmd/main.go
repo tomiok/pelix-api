@@ -4,6 +4,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	"github.com/tomiok/pelix-api/pkg/movies"
 	"github.com/tomiok/pelix-api/pkg/web"
 )
 
@@ -18,5 +19,6 @@ func main() {
 	migrate()
 	server := web.CreateServer()
 
+	go movies.NormalizeJob()
 	log.Fatal().Err(server.Run("8500"))
 }
