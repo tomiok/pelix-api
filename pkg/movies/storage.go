@@ -20,17 +20,11 @@ type MovieStorage interface {
 
 type ListStorage interface {
 	Add(item ListItem) error
-	Update(itemId uint) error
+	Update(userID, movieID uint) error
 }
 
 func (l *listStorage) Add(item ListItem) error {
-	//check if the list is created
-	var list WatchList
-	rows := l.db.Where("user_id=?", item.UserId).First(&list).RowsAffected
 
-	if rows == 0 {
-		l.db.Create(&list)
-	}
 
 	var user users.User
 	err := l.db.Where("id=?", item.UserId).First(&user).Error
@@ -47,16 +41,16 @@ func (l *listStorage) Add(item ListItem) error {
 	}
 
 	listItem := WatchList{
-		User:   user,
-		Movies: append(list.Movies, movie),
-		Seen:   false,
+		UserId:   user.ID,
+		MoviesId: movie.ID,
+		Seen:     false,
 	}
 
 	return l.db.Save(&listItem).Error
 }
 
-func (l *listStorage) Update(itemId uint) error {
-	panic("implement me")
+func (l *listStorage) Update(userID, movieID uint) error {
+	return l.db.Where("user_id=? and movie_id=?", userID, movieID).Update("seen", true).Error
 }
 
 type movieStorage struct {

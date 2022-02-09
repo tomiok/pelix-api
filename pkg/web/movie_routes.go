@@ -14,5 +14,5 @@ func setUpMovieRoutes(app *fiber.App) {
 	grp.Get("/", web.SearchMovieHandler)
 	grp.Get("/upcoming", web.UpcomingMoviesHandler)
 	grp.Post("/watchlist", web.AddMovieToListHandler)
-
+	grp.Put("/watchlist", web.UpdateToSeenHandler)
 }

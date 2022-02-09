@@ -54,9 +54,26 @@ func (w *Web) AddMovieToListHandler(ctx *fiber.Ctx) error {
 		return err
 	}
 	ctx.Status(http.StatusCreated)
-	return ctx.JSON(&AddToListResponse{Message: "added ok"})
+	return ctx.JSON(&ResponseOK{Message: "added ok"})
 }
 
-type AddToListResponse struct {
+func (w *Web) UpdateToSeenHandler(ctx *fiber.Ctx) error {
+	var u UpdateListRequest
+	err := ctx.BodyParser(&u)
+
+	if err != nil {
+		return err
+	}
+
+	err = w.Update(u.UserID, u.MovieID)
+
+	if err != nil {
+		return err
+	}
+	ctx.Status(http.StatusNoContent)
+	return ctx.JSON(ResponseOK{Message: "updated OK"})
+}
+
+type ResponseOK struct {
 	Message string `json:"msg"`
 }

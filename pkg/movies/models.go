@@ -1,7 +1,6 @@
 package movies
 
 import (
-	"github.com/tomiok/pelix-api/pkg/users"
 	"gorm.io/gorm"
 )
 
@@ -23,14 +22,19 @@ type Movie struct {
 // WatchList is the list with IN OWN database movies
 type WatchList struct {
 	gorm.Model
-	User   users.User
-	Movies []Movie
-	Seen   bool
+	UserId   uint
+	MoviesId uint
+	Seen     bool
 }
 
 type ListItem struct {
 	UserId  uint `json:"user_id,omitempty"` // could be grabbed from JWT
 	MovieId uint `json:"movie_id"`
+}
+
+type UpdateListRequest struct {
+	MovieID uint `json:"movie_id"`
+	UserID  uint `json:"user_id"`
 }
 
 // responses from movies APIs
@@ -136,5 +140,5 @@ func (u *UpcomingMovies) ToApi() []MovieSearchRes {
 
 // MigrateModels update db with models
 func MigrateModels(db *gorm.DB) error {
-	return db.AutoMigrate(&Movie{})
+	return db.AutoMigrate(&Movie{}, &WatchList{})
 }
