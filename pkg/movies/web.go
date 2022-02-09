@@ -74,6 +74,23 @@ func (w *Web) UpdateToSeenHandler(ctx *fiber.Ctx) error {
 	return ctx.JSON(ResponseOK{Message: "updated OK"})
 }
 
+func (w *Web) DeleteMovieInListHandler(ctx *fiber.Ctx) error {
+	var u UpdateListRequest //delete request
+	err := ctx.BodyParser(&u)
+
+	if err != nil {
+		return err
+	}
+
+	err = w.Delete(u.UserID, u.MovieID)
+
+	if err != nil {
+		return err
+	}
+	ctx.Status(http.StatusNoContent)
+	return ctx.JSON(ResponseOK{Message: "updated OK"})
+}
+
 type ResponseOK struct {
 	Message string `json:"msg"`
 }

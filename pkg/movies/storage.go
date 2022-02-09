@@ -21,11 +21,10 @@ type MovieStorage interface {
 type ListStorage interface {
 	Add(item ListItem) error
 	Update(userID, movieID uint) error
+	Delete(userID, movieID uint) error
 }
 
 func (l *listStorage) Add(item ListItem) error {
-
-
 	var user users.User
 	err := l.db.Where("id=?", item.UserId).First(&user).Error
 
@@ -51,6 +50,10 @@ func (l *listStorage) Add(item ListItem) error {
 
 func (l *listStorage) Update(userID, movieID uint) error {
 	return l.db.Where("user_id=? and movie_id=?", userID, movieID).Update("seen", true).Error
+}
+
+func (l *listStorage) Delete(userID, movieID uint) error {
+	return l.db.Delete(&WatchList{}, "where user_id=? and movie_id=?", userID, movieID).Error
 }
 
 type movieStorage struct {
