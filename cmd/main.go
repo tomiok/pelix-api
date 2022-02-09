@@ -19,6 +19,6 @@ func main() {
 	migrate()
 	server := web.CreateServer()
 
-	go movies.NormalizeJob()
+	go movies.ConcurrentJob()
 	log.Fatal().Err(server.Run("8500"))
 }
