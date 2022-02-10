@@ -4,7 +4,6 @@
 package database
 
 import (
-	"github.com/rs/zerolog/log"
 	"github.com/tomiok/pelix-api/pkg/configs"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -29,7 +28,6 @@ func initDB() *gorm.DB {
 			panic(err)
 		}
 
-		log.Debug().Msg("database object crated")
 		DB = db
 		return DB
 	}

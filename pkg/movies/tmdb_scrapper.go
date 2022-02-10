@@ -59,7 +59,6 @@ func Job(db *gorm.DB) {
 
 func job(inputChan chan uint, db *gorm.DB) {
 	for id := range inputChan {
-		log.Info().Msgf("fetching %d", id)
 		res, err := FetchMovie(id)
 
 		if err != nil {

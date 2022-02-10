@@ -1,3 +1,4 @@
 .idea
 pelix.db
 .env
+*.out
