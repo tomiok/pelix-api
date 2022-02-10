@@ -6,10 +6,13 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/tomiok/pelix-api/pkg/database"
 	"github.com/tomiok/pelix-api/pkg/movies"
-	"github.com/tomiok/pelix-api/pkg/web"
+	"os"
+	"runtime/trace"
 )
 
 func main() {
+	trace.Start(os.Stderr)
+	defer trace.Stop()
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 	err := godotenv.Load(".env")
 
@@ -18,10 +21,11 @@ func main() {
 	}
 
 	migrate()
-	server := web.CreateServer()
+	//server := web.CreateServer()
 
 	//go movies.ConcurrentJob()
 
 	movies.Job(database.Get())
-	log.Fatal().Err(server.Run("8500"))
+	//log.Fatal().Err(server.Run("8500"))
+	//time.Sleep(1 * time.Hour)
 }

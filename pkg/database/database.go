@@ -15,7 +15,7 @@ var DB *gorm.DB
 
 func initDB() *gorm.DB {
 	var logLevel = logger.Info
-	if configs.Get().Env == "prod" {
+	if configs.Get().Env == "local"{
 		logLevel = logger.Silent
 	}
 	cfg := gorm.Config{
