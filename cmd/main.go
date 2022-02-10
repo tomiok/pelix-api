@@ -4,6 +4,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	"github.com/tomiok/pelix-api/pkg/database"
 	"github.com/tomiok/pelix-api/pkg/movies"
 	"github.com/tomiok/pelix-api/pkg/web"
 )
@@ -19,6 +20,8 @@ func main() {
 	migrate()
 	server := web.CreateServer()
 
-	go movies.ConcurrentJob()
+	//go movies.ConcurrentJob()
+
+	movies.Job(database.Get())
 	log.Fatal().Err(server.Run("8500"))
 }
