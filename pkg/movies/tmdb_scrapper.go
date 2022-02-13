@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/rs/zerolog/log"
 	"github.com/tomiok/pelix-api/pkg/configs"
+	"github.com/tomiok/pelix-api/pkg/database"
 	"gorm.io/gorm"
 	"net/http"
 	"strconv"
@@ -40,6 +41,67 @@ func (r *TmdbByIdRes) ToMovie() *Movie {
 const maxRun = 1000000
 const threads = 8
 
+func ETL() {
+	idsChannel := make(chan uint)
+	tmdbChan := make(chan *TmdbByIdRes)
+	moviesChan := make(chan *Movie)
+	db := database.Get()
+
+	go extract(idsChannel, tmdbChan)
+	go transform(tmdbChan, moviesChan)
+	go load(moviesChan, db)
+
+	for i := 0; i < 5000; i++ {
+		idsChannel <- uint(i)
+	}
+	close(idsChannel)
+}
+
+func extract(idsChannel chan uint, tmdbChannel chan *TmdbByIdRes) {
+	for id := range idsChannel {
+		url := fmt.Sprintf(urlFmt, id, configs.Get().MovieKey)
+		time.Sleep(200 * time.Millisecond)
+		res, err := client.Get(url)
+
+		if err != nil {
+			continue
+		}
+
+		if res.Status != "200 OK" {
+			client.CloseIdleConnections()
+			//return nil, errors.New("wrong status " + res.Status + " for id " + strconv.Itoa(int(movieID)))
+			continue
+		}
+
+		body := res.Body
+
+		var result TmdbByIdRes
+		err = json.NewDecoder(body).Decode(&result)
+
+		tmdbChannel <- &result
+		body.Close()
+	}
+	close(tmdbChannel)
+}
+
+func transform(tmdbChannel chan *TmdbByIdRes, moviesChan chan *Movie) {
+	for tmdb := range tmdbChannel {
+		movie := tmdb.ToMovie()
+
+		moviesChan <- movie
+	}
+
+	close(moviesChan)
+}
+
+func load(moviesChan chan *Movie, db *gorm.DB) {
+	for movie := range moviesChan {
+		db.Create(movie)
+	}
+}
+
+//concurrent job
+
 func Job(db *gorm.DB) {
 	inputChan := make(chan uint, 1000)
 
@@ -50,7 +112,6 @@ func Job(db *gorm.DB) {
 	}
 
 	for i := 1; i < maxRun; i++ {
-		log.Info().Msgf("run #%d", i)
 		inputChan <- uint(i)
 	}
 
@@ -96,7 +157,7 @@ var client = &http.Client{
 
 func FetchMovie(movieID uint) (*TmdbByIdRes, error) {
 	url := fmt.Sprintf(urlFmt, movieID, configs.Get().MovieKey)
-
+	time.Sleep(200 * time.Millisecond)
 	res, err := client.Get(url)
 
 	if err != nil {

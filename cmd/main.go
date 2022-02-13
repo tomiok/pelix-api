@@ -4,15 +4,10 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"github.com/tomiok/pelix-api/pkg/database"
 	"github.com/tomiok/pelix-api/pkg/movies"
-	"os"
-	"runtime/trace"
 )
 
 func main() {
-	trace.Start(os.Stderr)
-	defer trace.Stop()
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 	err := godotenv.Load(".env")
 
@@ -25,7 +20,13 @@ func main() {
 
 	//go movies.ConcurrentJob()
 
-	movies.Job(database.Get())
+	//job with thread pool
+	//movies.Job(database.Get())
+
+
+	//job as pipeline
+	movies.ETL()
+
 	//log.Fatal().Err(server.Run("8500"))
 	//time.Sleep(1 * time.Hour)
 }
