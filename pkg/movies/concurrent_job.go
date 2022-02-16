@@ -3,22 +3,9 @@ package movies
 import (
 	"github.com/rs/zerolog/log"
 	"github.com/tomiok/pelix-api/pkg/database"
-	"time"
 )
 
-func BackgroundJob() {
-	tick := time.NewTicker(1 * time.Second)
-
-	for {
-		select {
-		case <-tick.C:
-
-		}
-	}
-}
-
 func ConcurrentJob() {
-	log.Info().Msg("started!!!")
 	mainCh := make(chan uint, 1000)
 
 	for i := 0; i < 8; i++ {

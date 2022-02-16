@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/rs/zerolog/log"
 	"github.com/tomiok/pelix-api/pkg/configs"
-	"github.com/tomiok/pelix-api/pkg/database"
 	"gorm.io/gorm"
 	"net/http"
 	"strconv"
@@ -40,22 +39,6 @@ func (r *TmdbByIdRes) ToMovie() *Movie {
 
 const maxRun = 1000000
 const threads = 8
-
-func ETL() {
-	idsChannel := make(chan uint)
-	tmdbChan := make(chan *TmdbByIdRes)
-	moviesChan := make(chan *Movie)
-	db := database.Get()
-
-	go extract(idsChannel, tmdbChan)
-	go transform(tmdbChan, moviesChan)
-	go load(moviesChan, db)
-
-	for i := 0; i < 5000; i++ {
-		idsChannel <- uint(i)
-	}
-	close(idsChannel)
-}
 
 func extract(idsChannel chan uint, tmdbChannel chan *TmdbByIdRes) {
 	for id := range idsChannel {
@@ -98,24 +81,6 @@ func load(moviesChan chan *Movie, db *gorm.DB) {
 	for movie := range moviesChan {
 		db.Create(movie)
 	}
-}
-
-//concurrent job
-
-func Job(db *gorm.DB) {
-	inputChan := make(chan uint, 1000)
-
-	for i := 0; i < threads; i++ {
-		go func() {
-			job(inputChan, db)
-		}()
-	}
-
-	for i := 1; i < maxRun; i++ {
-		inputChan <- uint(i)
-	}
-
-	close(inputChan)
 }
 
 func job(inputChan chan uint, db *gorm.DB) {
