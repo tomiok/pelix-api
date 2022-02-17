@@ -40,6 +40,10 @@ func (w *Web) UpcomingMoviesHandler(ctx *fiber.Ctx) error {
 	return ctx.JSON(res)
 }
 
+func (w *Web) HealthHandler(ctx *fiber.Ctx) error {
+	return ctx.JSON(fiber.Map{"status": "OK"})
+}
+
 func (w *Web) AddMovieToListHandler(ctx *fiber.Ctx) error {
 	var listItem ListItem
 	err := ctx.BodyParser(&listItem)

@@ -4,7 +4,8 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"github.com/tomiok/pelix-api/pkg/movies"
+	"github.com/tomiok/pelix-api/pkg/jobs"
+	"github.com/tomiok/pelix-api/pkg/web"
 )
 
 func main() {
@@ -16,7 +17,7 @@ func main() {
 	}
 
 	migrate()
-	//server := web.CreateServer()
+	server := web.CreateServer()
 
 	//go movies.ConcurrentJob()
 
@@ -25,8 +26,10 @@ func main() {
 
 
 	//job as pipeline
-	movies.ETL()
+	//movies.ETL()
 
-	//log.Fatal().Err(server.Run("8500"))
+	go jobs.ETL()
+	log.Fatal().Err(server.Run("8500"))
 	//time.Sleep(1 * time.Hour)
 }
+// https://discord.io/go-latam

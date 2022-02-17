@@ -13,8 +13,10 @@ func setUpMovieRoutes(app *fiber.App) {
 	grp := app.Group("/movies")
 	grp.Get("/", web.SearchMovieHandler)
 	grp.Get("/upcoming", web.UpcomingMoviesHandler)
+	grp.Get("/status", web.HealthHandler)
 
 	grp.Post("/watchlist", web.AddMovieToListHandler)
 	grp.Put("/watchlist", web.UpdateToSeenHandler)
 	grp.Delete("/watchlist", web.DeleteMovieInListHandler)
+
 }
